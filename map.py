@@ -1,5 +1,5 @@
 from controllers.utils import bresenham
-from controllers.TP4.occupancy_grid import OccupancyGrid
+from controllers.occupancy_grid import OccupancyGrid
 from controller import LidarPoint, Supervisor
 import numpy as np
 from controllers.transformations import get_translation
@@ -33,12 +33,18 @@ class DeterministicOccupancyGrid(OccupancyGrid):
         for coord in grid_lidar_coords:
             self.update_cell(coord, True)
 
-        return len(grid_lidar_coords) # retornar numero de celulas exploradas
+        explored_cells = set(grid_lidar_coords)
+        return len(explored_cells) # retornar numero de celulas exploradas
 
     def update_cell(self, coords: (int, int), is_occupied: bool):
         if self.are_grid_coords_in_bounds(coords):
+            # Check if the cell has already been explored
+            if self.occupancy_grid[coords] != 0.5:  # Cell is not unknown
+                return True  # Cell has already been explored
+
             # Update the grid cell
             self.occupancy_grid[coords] = 1 if is_occupied else 0
 
-        return # em vez de none se já tinha sido explorado
+        return False  # Cell has not been explored before
+
 

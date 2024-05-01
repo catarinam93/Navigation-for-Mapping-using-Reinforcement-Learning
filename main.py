@@ -7,7 +7,11 @@ def main():
     robot: Robot = Robot()
     timestep: int = 100  # in ms
 
-    map: DeterministicOccupancyGrid = DeterministicOccupancyGrid([0.0, 0.0], [200, 200], 0.01)
+    map_origin = (0.0, 0.0)
+    map_dimensions = (200, 200)
+    map_resolution = 0.01
+
+    map: DeterministicOccupancyGrid = DeterministicOccupancyGrid(map_origin, map_dimensions, map_resolution)
 
     lidar: Lidar = robot.getDevice('lidar')
     lidar.enable(timestep)

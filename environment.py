@@ -1,5 +1,7 @@
 import gymnasium as gym
 from map import *
+from controller import Supervisor, Field
+from typing import List
 
 class Environment(gym.Env):
     def __init__(self):
@@ -29,9 +31,6 @@ class Environment(gym.Env):
         trans_field.setSFVec3f(translation)
         robot_node.resetPhysics()
 
-    def _get_obs(self):
-        return {"Amount of map mapped", amount}
-
     # Reset the environment
     def reset(self):
         super().reset()  # Reset the environment
@@ -47,17 +46,38 @@ class Environment(gym.Env):
         # info = self._get_info()
         return observation  # , info
 
+    def terminated(self):
+        #completar
+        return false
 
-    # ---------------------------------------------------
+    def calculate_reward(self):
+        #completar
+        reward = 0
+        return reward
+
+    '''def _get_obs(self):
+        # Calculate the percentage of map explored
+        total_cells = np.prod(self.map.occupancy_grid.shape)
+        explored_cells = np.count_nonzero(self.map.occupancy_grid != 0.5) 
+        percentage_explored = (explored_cells / total_cells) * 100
+
+        observation = {"Percentage of map explored": percentage_explored}
+        return observation'''
+
+    def _get_obs(self):
+        amount = 0
+        return {"Amount of map mapped", amount}
 
     # Step the environment
     def step(self, action):
         # An episode is done if the robot has completed the map
 
         # Reward
-        reward =
+        reward = self.calculate_reward()
+
+        terminated = self.terminated()
 
         observation = self._get_obs()
-        # info = self._get_info()
 
         return observation, reward, terminated  # , info
+
