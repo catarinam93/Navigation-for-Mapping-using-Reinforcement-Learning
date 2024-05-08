@@ -4,6 +4,7 @@ from controller import LidarPoint, Supervisor
 import numpy as np
 from controllers.transformations import get_translation
 
+
 class DeterministicOccupancyGrid(OccupancyGrid):
     def __init__(self, origin: (float, float), dimensions: (int, int), resolution: float):
         super().__init__(origin, dimensions, resolution)
@@ -46,5 +47,23 @@ class DeterministicOccupancyGrid(OccupancyGrid):
             self.occupancy_grid[coords] = 1 if is_occupied else 0
 
         return False  # Cell has not been explored before
+
+    def percentage_explored(self) -> float:
+        total = len(self.occupancy_grid)
+        explored_cells = sum(1 for coord in self.occupancy_grid if coord == 1)
+        percentage = (explored_cells / total) * 100
+        return percentage
+
+    def all_cells_explored(self) -> bool:
+        explored_cells = 0
+
+        for coord in self.occupancy_grid:
+            if coord == 1:
+                explored_cells += 1
+
+        if self.percentage_explored() >= 0.95:
+            return True
+        else:
+            return False
 
 

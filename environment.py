@@ -1,12 +1,17 @@
 import gymnasium as gym
-from map import *
+from controllers.TP4.occupancy_grid import OccupancyGrid
+from map import update_map, all_cells_explored, percentage_explored
 from controller import Supervisor, Field
+from controllers.utils import cmd_vel
+import numpy as np
 from typing import List
+from settings import *
 
 class Environment(gym.Env):
-    def __init__(self):
+    def __init__(self, robot):
         self.map = None
         self.timesteps = 0
+        self.robot = robot
 
         self.sensor_bounds = [0, 255]  # Sensor bounds of the environment
         '''self.angle_bounds = [-np.pi, np.pi]  # Angle bounds of the environment
@@ -41,43 +46,38 @@ class Environment(gym.Env):
 
         # Reset all the variables
         self.timesteps = 0  # Reset the timesteps
-
+        self.terminated = False
+        self.reward = 0
         observation = self._get_obs()
         # info = self._get_info()
-        return observation  # , info
+        return observation, None  # None is the info, is mandatory in gym environments
 
-    def terminated(self):
-        #completar
-        return false
+    def calculate_reward(self, num_explored_cells):
+        if all_cells_explored():
+            self.reward += FINAL_REWARD
+            self.terminated = True
 
-    def calculate_reward(self):
-        #completar
-        reward = 0
-        return reward
+        elif num_explored_cells == 0:
+            self.reward += NULL_REWARD
 
-    '''def _get_obs(self):
-        # Calculate the percentage of map explored
-        total_cells = np.prod(self.map.occupancy_grid.shape)
-        explored_cells = np.count_nonzero(self.map.occupancy_grid != 0.5) 
-        percentage_explored = (explored_cells / total_cells) * 100
-
-        observation = {"Percentage of map explored": percentage_explored}
-        return observation'''
+        else:
+            self.reward = NEUTRAL_REWARD
 
     def _get_obs(self):
-        amount = 0
-        return {"Amount of map mapped", amount}
+        amount_explored = percentage_explored()
+        return amount_explored
 
     # Step the environment
     def step(self, action):
-        # An episode is done if the robot has completed the map
+        linear_velocity = action[0]
+        angular_velocity = action[1]
 
-        # Reward
-        reward = self.calculate_reward()
+        cmd_vel(self.robot, linear_velocity, angular_velocity)
 
-        terminated = self.terminated()
+        num_explored_cells = update_map()
+
+        self.calculate_reward(num_explored_cells)
 
         observation = self._get_obs()
 
-        return observation, reward, terminated  # , info
-
+        return observation, self.reward, self.terminated  # , info

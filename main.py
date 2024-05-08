@@ -3,6 +3,7 @@ import math
 from map import *
 from controllers.transformations import create_tf_matrix
 
+
 def main():
     robot: Robot = Robot()
     timestep: int = 100  # in ms
