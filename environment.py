@@ -12,6 +12,7 @@ class Environment(gym.Env):
         self.map = None
         self.timesteps = 0
         self.robot = robot
+        self.terminated = False
 
         self.sensor_bounds = [0, 255]  # Sensor bounds of the environment
         '''self.angle_bounds = [-np.pi, np.pi]  # Angle bounds of the environment
@@ -29,7 +30,7 @@ class Environment(gym.Env):
                                                   shape=(100), #numero de raios
                                                   dtype=np.float32)
 
-    def warp_robot(supervisor: Supervisor, robot_def_name: str, new_position: (float, float)) -> None:
+    def warp_robot(self, supervisor: Supervisor, robot_def_name: str, new_position: (float, float)) -> None:
         robot_node = supervisor.getFromDef(robot_def_name)
         trans_field: Field = robot_node.getField("translation")
         translation: List[float] = [new_position[0], new_position[1], 0]

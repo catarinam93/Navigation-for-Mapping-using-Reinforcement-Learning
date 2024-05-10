@@ -1,7 +1,9 @@
 from controller import Robot, Lidar, Compass, GPS
 import math
 from map import *
+from environment import *
 from controllers.transformations import create_tf_matrix
+from q_learning import *
 
 
 def main():
@@ -33,3 +35,15 @@ def main():
 
     # Read the LiDAR and update the map
     map.update_map(robot_tf, lidar.getPointCloud())
+
+# ------------------------------------------------ ENVIRONMENT ---------------------------------------------------------
+    env = Environment(robot)
+
+# ----------------------------------- ALGORITHMS AND THEIR HYPERPARAMETERS ---------------------------------------------
+    learning_rate = 0.8
+    discount_factor = 0.95
+    exploration_prob = 0.2
+    epochs = 1000
+    epsilon = 0.01
+
+    QLearning(env, learning_rate, discount_factor, exploration_prob, epochs, epsilon)
