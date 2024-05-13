@@ -1,8 +1,7 @@
 from controller import Supervisor, Lidar, Compass, GPS
-from map import *
+from stable_baselines3 import PPO
 from environment import *
-from controllers.transformations import create_tf_matrix
-from q_learning import *
+from map import *
 
 
 def main():
@@ -12,7 +11,7 @@ def main():
     map_origin = (0.0, 0.0)
     map_dimensions = (200, 200)
     map_resolution = 0.01
-    print("aqui")
+
     map: DeterministicOccupancyGrid = DeterministicOccupancyGrid(map_origin, map_dimensions, map_resolution)
     lidar: Lidar = supervisor.getDevice('lidar')
     lidar.enable(timestep)
@@ -48,10 +47,11 @@ def main():
 
 
 # ------------------------------------------------ ENVIRONMENT ---------------------------------------------------------
-    env = Environment(supervisor)
+
+    #custom_env = Environment(supervisor)
 
 # ----------------------------------- ALGORITHMS AND THEIR HYPERPARAMETERS ---------------------------------------------
-    learning_rate = 0.8
+    '''learning_rate = 0.8
     discount_factor = 0.95
     exploration_prob = 0.2
     epochs = 1000
@@ -62,7 +62,15 @@ def main():
     q_learning_agent = QLearning(env, learning_rate, discount_factor, exploration_prob, epochs, epsilon)
 
     # Train the Q-learning algorithm
-    q_learning_agent.learn()
+    q_learning_agent.learn()'''
+
+    gym.register(id='CustomEnv-v0', entry_point=lambda: Environment(supervisor))
+    env = gym.make('CustomEnv-v0')
+
+    # Train the model
+    model = PPO("MlpPolicy", env, verbose=1)
+    model.learn(total_timesteps=25000)
+    model.save("ppo")
 
 
 def contains_nan(values):
