@@ -8,10 +8,10 @@ from typing import List
 from settings import *
 
 class Environment(gym.Env):
-    def __init__(self, robot):
+    def __init__(self, supervisor):
         self.map = None
         self.timesteps = 0
-        self.robot = robot
+        self.supervisor = supervisor
 
         self.sensor_bounds = [0, 255]  # Sensor bounds of the environment
         '''self.angle_bounds = [-np.pi, np.pi]  # Angle bounds of the environment
@@ -35,6 +35,7 @@ class Environment(gym.Env):
         trans_field.setSFVec3f(translation)
         robot_node.resetPhysics()
 
+
     # Reset the environment
     def reset(self):
         super().reset()  # Reset the environment
@@ -43,8 +44,7 @@ class Environment(gym.Env):
         map_resolution = 0.01
         self.map = DeterministicOccupancyGrid(map_origin, map_dimensions, map_resolution)  # Resets the map
         initial_position = (0.05, 0.04)
-        self.warp_robot(self.robot, "robot", initial_position) # fazer reset à orientação do utils NOTA: MUDAR COORDENADAS, FOI SO PRA TESTAR
-
+        self.warp_robot(self.supervisor, "EPUCK", initial_position) # fazer reset à orientação do utils
         # Reset all the variables
         self.timesteps = 0  # Reset the timesteps
         self.terminated = False
@@ -65,7 +65,7 @@ class Environment(gym.Env):
             self.reward = NEUTRAL_REWARD
 
     def _get_obs(self):
-        amount_explored = DeterministicOccupancyGrid.percentage_explored()
+        amount_explored = self.map.percentage_explored()
         return amount_explored
 
     # Step the environment
@@ -73,7 +73,7 @@ class Environment(gym.Env):
         linear_velocity = action[0]
         angular_velocity = action[1]
 
-        cmd_vel(self.robot, linear_velocity, angular_velocity)
+        cmd_vel(self.supervisor, linear_velocity, angular_velocity)
 
         num_explored_cells = DeterministicOccupancyGrid.update_map()
 

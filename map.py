@@ -51,9 +51,9 @@ class DeterministicOccupancyGrid(OccupancyGrid):
         return False  # Cell has not been explored before
 
     def percentage_explored(self) -> float:
-        total = len(self.occupancy_grid)
-        explored_cells = sum(1 for coord in self.occupancy_grid if coord == 1)
-        percentage = (explored_cells / total) * 100
+        total_cells = np.size(self.occupancy_grid)
+        explored_cells = np.count_nonzero(self.occupancy_grid == 1)
+        percentage = (explored_cells / total_cells) * 100
         return percentage
 
     def all_cells_explored(self) -> bool:
