@@ -1,5 +1,4 @@
 import gymnasium as gym
-from controllers.occupancy_grid import OccupancyGrid
 from map import DeterministicOccupancyGrid
 from controller import Supervisor, Field, Robot
 from controllers.utils import cmd_vel
@@ -14,8 +13,6 @@ class Environment(gym.Env):
         self.supervisor = supervisor
 
         self.sensor_bounds = [0, 255]  # Sensor bounds of the environment
-        '''self.angle_bounds = [-np.pi, np.pi]  # Angle bounds of the environment
-        self.distance_bounds = [0, np.inf]  # Distance bounds of the environment'''
 
         self.angular_vel_bounds = [-1.0, 1.0]  # Angular Velocity bounds of the environment
         self.linear_vel_bounds = [-1.0, 1.0]  # Linear Velocity bounds of the environment
@@ -28,6 +25,7 @@ class Environment(gym.Env):
                                                 high=np.array([self.sensor_bounds[1]] * 100),
                                                 dtype=np.float32)
 
+# -------------------------------- METER AQUI UM COMENTARIO QUALQUER A DIZER O QUE ISTO É ------------------------------
     def warp_robot(self, supervisor: Supervisor, robot_def_name: str, new_position: (float, float)) -> None:
         robot_node = supervisor.getFromDef(robot_def_name)
         trans_field: Field = robot_node.getField("translation")
@@ -36,7 +34,7 @@ class Environment(gym.Env):
         robot_node.resetPhysics()
 
 
-    # Reset the environment
+# -------------------------------------------------- RESET FUNCTION ----------------------------------------------------
     def reset(self):
         super().reset()  # Reset the environment
         map_origin = (0.0, 0.0)
@@ -53,6 +51,7 @@ class Environment(gym.Env):
         # info = self._get_info()
         return observation, None  # None is the info, is mandatory in gym environments
 
+# ---------------------------------- STEP FUNCTION, OBSERVATIONS AND REWARD CALCULATION --------------------------------
     def calculate_reward(self, num_explored_cells):
         if DeterministicOccupancyGrid.all_cells_explored():
             self.reward += FINAL_REWARD

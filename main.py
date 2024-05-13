@@ -1,5 +1,4 @@
 from controller import Supervisor, Lidar, Compass, GPS
-import math
 from map import *
 from environment import *
 from controllers.transformations import create_tf_matrix
@@ -13,7 +12,7 @@ def main():
     map_origin = (0.0, 0.0)
     map_dimensions = (200, 200)
     map_resolution = 0.01
-
+    print("aqui")
     map: DeterministicOccupancyGrid = DeterministicOccupancyGrid(map_origin, map_dimensions, map_resolution)
     lidar: Lidar = supervisor.getDevice('lidar')
     lidar.enable(timestep)
