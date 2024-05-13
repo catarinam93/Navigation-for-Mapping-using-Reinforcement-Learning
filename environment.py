@@ -1,7 +1,7 @@
 import gymnasium as gym
-from controllers.TP4.occupancy_grid import OccupancyGrid
-from map import update_map, all_cells_explored, percentage_explored
-from controller import Supervisor, Field
+from controllers.occupancy_grid import OccupancyGrid
+from map import DeterministicOccupancyGrid
+from controller import Supervisor, Field, Robot
 from controllers.utils import cmd_vel
 import numpy as np
 from typing import List
@@ -12,7 +12,6 @@ class Environment(gym.Env):
         self.map = None
         self.timesteps = 0
         self.robot = robot
-        self.terminated = False
 
         self.sensor_bounds = [0, 255]  # Sensor bounds of the environment
         '''self.angle_bounds = [-np.pi, np.pi]  # Angle bounds of the environment
@@ -22,13 +21,12 @@ class Environment(gym.Env):
         self.linear_vel_bounds = [-1.0, 1.0]  # Linear Velocity bounds of the environment
 
         self.action_space = gym.spaces.Box(low=np.array([self.linear_vel_bounds[0], self.angular_vel_bounds[0]]),
-                                            high=np.array([self.linear_vel_bounds[1], self.angular_vel_bounds[1]]),
-                                            dtype=np.float32)  # Action space of the environment
+                                           high=np.array([self.linear_vel_bounds[1], self.angular_vel_bounds[1]]),
+                                           dtype=np.float32)  # Action space of the environment
 
-        self.observation_space = gym.spaces.Box(low=self.sensor_bounds[0],
-                                                  high=self.sensor_bounds[1],
-                                                  shape=(100), #numero de raios
-                                                  dtype=np.float32)
+        self.observation_space = gym.spaces.Box(low=np.array([self.sensor_bounds[0]] * 100),
+                                                high=np.array([self.sensor_bounds[1]] * 100),
+                                                dtype=np.float32)
 
     def warp_robot(self, supervisor: Supervisor, robot_def_name: str, new_position: (float, float)) -> None:
         robot_node = supervisor.getFromDef(robot_def_name)
@@ -40,10 +38,12 @@ class Environment(gym.Env):
     # Reset the environment
     def reset(self):
         super().reset()  # Reset the environment
-
-        self.map = DeterministicOccupancyGrid(OccupancyGrid) # Resets the map
-
-        self.warp_robot() # fazer reset à orientação do utils
+        map_origin = (0.0, 0.0)
+        map_dimensions = (200, 200)
+        map_resolution = 0.01
+        self.map = DeterministicOccupancyGrid(map_origin, map_dimensions, map_resolution)  # Resets the map
+        initial_position = (0.05, 0.04)
+        self.warp_robot(self.robot, "robot", initial_position) # fazer reset à orientação do utils NOTA: MUDAR COORDENADAS, FOI SO PRA TESTAR
 
         # Reset all the variables
         self.timesteps = 0  # Reset the timesteps
@@ -54,7 +54,7 @@ class Environment(gym.Env):
         return observation, None  # None is the info, is mandatory in gym environments
 
     def calculate_reward(self, num_explored_cells):
-        if all_cells_explored():
+        if DeterministicOccupancyGrid.all_cells_explored():
             self.reward += FINAL_REWARD
             self.terminated = True
 
@@ -65,7 +65,7 @@ class Environment(gym.Env):
             self.reward = NEUTRAL_REWARD
 
     def _get_obs(self):
-        amount_explored = percentage_explored()
+        amount_explored = DeterministicOccupancyGrid.percentage_explored()
         return amount_explored
 
     # Step the environment
@@ -75,7 +75,7 @@ class Environment(gym.Env):
 
         cmd_vel(self.robot, linear_velocity, angular_velocity)
 
-        num_explored_cells = update_map()
+        num_explored_cells = DeterministicOccupancyGrid.update_map()
 
         self.calculate_reward(num_explored_cells)
 

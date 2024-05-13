@@ -1,4 +1,4 @@
-from controller import Robot, Lidar, Compass, GPS
+from controller import Supervisor, Lidar, Compass, GPS
 import math
 from map import *
 from environment import *
@@ -7,15 +7,14 @@ from q_learning import *
 
 
 def main():
-    robot: Robot = Robot()
-    timestep: int = 100  # in ms
 
+    robot: Supervisor = Supervisor()
+    timestep: int = 100  # in ms
     map_origin = (0.0, 0.0)
     map_dimensions = (200, 200)
     map_resolution = 0.01
 
     map: DeterministicOccupancyGrid = DeterministicOccupancyGrid(map_origin, map_dimensions, map_resolution)
-
     lidar: Lidar = robot.getDevice('lidar')
     lidar.enable(timestep)
     lidar.enablePointCloud()
@@ -26,15 +25,28 @@ def main():
     gps: GPS = robot.getDevice('gps')
     gps.enable(timestep)
 
-    # Read the robot's pose
     gps_readings: [float] = gps.getValues()
-    robot_position: (float, float) = (gps_readings[0], gps_readings[1])
     compass_readings: [float] = compass.getValues()
+    # Read the robot's pose
+    while contains_nan(gps_readings) or contains_nan(compass_readings):
+        gps_readings: [float] = gps.getValues()
+        compass_readings: [float] = compass.getValues()
+        robot.step()
+
+    print("gps:", gps_readings)
+    print("compass:", compass_readings)
+    robot_position: (float, float) = (gps_readings[0], gps_readings[1])
     robot_orientation: float = math.atan2(compass_readings[0], compass_readings[1])
+    print("robot_position:", robot_position)
+    print("robot_orientation:", robot_orientation)
     robot_tf: np.ndarray = create_tf_matrix((robot_position[0], robot_position[1], 0.0), robot_orientation)
 
     # Read the LiDAR and update the map
-    map.update_map(robot_tf, lidar.getPointCloud())
+    point_cloud = lidar.getPointCloud()
+    valid_points = [point for point in point_cloud if
+                    not (math.isnan(point.x) or math.isnan(point.y) or math.isnan(point.z))]
+    map.update_map(robot_tf, valid_points)
+
 
 # ------------------------------------------------ ENVIRONMENT ---------------------------------------------------------
     env = Environment(robot)
@@ -46,4 +58,16 @@ def main():
     epochs = 1000
     epsilon = 0.01
 
-    QLearning(env, learning_rate, discount_factor, exploration_prob, epochs, epsilon)
+
+    # Initialize Q-learning algorithm
+    q_learning_agent = QLearning(env, learning_rate, discount_factor, exploration_prob, epochs, epsilon)
+
+    # Train the Q-learning algorithm
+    q_learning_agent.learn()
+
+
+def contains_nan(values):
+    return any(math.isnan(value) for value in values)
+
+if __name__ == "__main__":
+    main()
