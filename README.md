@@ -1,4 +1,3 @@
-# Navigation-for-Mapping-using-Reinforcement-Learning
 # README
 
 ## Description
