@@ -17,11 +17,13 @@ import random
 import gymnasium as gym
 
 class Environment(gym.Env):
-    def __init__(self, supervisor):
+    def __init__(self, supervisor, mapsdir):
         # Initialize the environment with a supervisor object
         self.map = None  # Initialize the map to None
         self.timesteps = 0  # Initialize the timestep counter
         self.supervisor = supervisor  # Store the supervisor object
+        self.mapsdir = mapsdir # Store the directory to save the maps
+        self.num_terminated = 0 # Initialize the number of times the map terminated
 
         self.terminated = False  # Set the termination flag to False
         self.reward = 0  # Initialize the reward
@@ -108,6 +110,7 @@ class Environment(gym.Env):
         self.timesteps = 0  # Reset the timestep counter
         self.terminated = False  # Reset the termination flag
         self.reward = 0  # Reset the reward
+        self.num_terminated += 1 # Number of resets
 
         observation = self._get_obs()  # Get the initial observation
 
@@ -145,6 +148,9 @@ class Environment(gym.Env):
         # Calculate the reward
         self.calculate_reward(num_explored_cells, valid_points, supervisor_position, collision)
 
+        # Add 1 timestep
+        self.timesteps += 1
+
         return observation, self.reward, self.terminated, False, {}  # Return the observation, reward, terminated flag, truncated flag, and info dictionary
 
     def warp_robot(self, supervisor: Supervisor, robot_def_name: str, new_position: (float, float)) -> None:
@@ -161,6 +167,8 @@ class Environment(gym.Env):
         # Function to calculate the reward
         if self.map.all_cells_explored():  # Check if all cells are explored
             self.reward += FINAL_REWARD  # Add the final reward
+            print(f"All cells explored, map terminated at {self.timesteps} timesteps.")
+            self.map.plot_grid(save_path=f"{self.mapsdir}/{self.num_terminated}_{self.timesteps}_timesteps.png")
             self.terminated = True  # Set the termination flag to True
         elif num_explored_cells == 0:  # Check if no cells were explored
             self.reward += NULL_REWARD  # Add the null reward
@@ -171,6 +179,7 @@ class Environment(gym.Env):
             self.reward += COLLISION_REWARD  # Add the collision reward
         else:
             self.reward = NEUTRAL_REWARD  # Add the neutral reward
+
 
     def _get_obs(self):
         # Function to get the observation

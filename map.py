@@ -11,6 +11,7 @@ from occupancy_grid import OccupancyGrid
 import numpy as np
 from controllers.transformations import get_translation
 from typing import List, Tuple
+import matplotlib.pyplot as plt
 
 class DeterministicOccupancyGrid(OccupancyGrid):
     def __init__(self, origin: (float, float), dimensions: (int, int), resolution: float):
@@ -92,3 +93,15 @@ class DeterministicOccupancyGrid(OccupancyGrid):
         Unknown cells are represented by 0.5, free cells by 0, and occupied cells by 1.
         """
         return self.occupancy_grid.flatten()
+
+    def plot_grid(self, save_path=None):
+        plt.figure()  # New figure
+        plt.imshow(self.occupancy_grid, cmap='gray', origin='lower')
+        plt.colorbar(label='Occupancy Probability')
+        plt.title('Deterministic Occupancy Grid')
+        plt.xlabel('X')
+        plt.ylabel('Y')
+        if save_path:
+            plt.savefig(save_path)
+        else:
+            plt.show()

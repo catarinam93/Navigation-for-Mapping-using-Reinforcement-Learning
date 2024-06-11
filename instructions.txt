@@ -54,3 +54,7 @@ Instructions:
 6. Open the desired world file in Webots to observe the environment.
 7. Run the desired reinforcement learning algorithm script (ppo_main.py, sac_main.py, a2c_main.py) to train the navigation agent.
 9. While training the navigation agent, you can observe its behavior by running the simulation in Webots.
+10. After training your models, to test the performance of PPO, A2C, and TD3 trained models, follow these steps:
+    a. Choose the desired environment map you want to test the models on.
+    b. Inside the `test.py` script, ensure that you select the most recent model file (e.g., `10.zip`) for each respective algorithm (PPO, A2C, TD3).
+    c. Run the script and visualize the generate maps for each algorithm.

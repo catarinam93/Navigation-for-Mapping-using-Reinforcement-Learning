@@ -84,6 +84,8 @@ def main():
     # Define directories for saving models and logging
     models_dir = "models/A2C"
     logdir = "tensorboard"
+    mapsdir = "maps_images/A2C/map0/iter"
+    final_mapsdir = "maps_images/A2C/map0/final_maps"  # change map_x depending on the used world
 
     # Create directories if they don't exist
     if not os.path.exists(models_dir):
@@ -92,16 +94,22 @@ def main():
     if not os.path.exists(logdir):
         os.makedirs(logdir)
 
+    if not os.path.exists(mapsdir):
+        os.makedirs(mapsdir)
+
+    if not os.path.exists(final_mapsdir):
+        os.makedirs(final_mapsdir)
+
     # Register and create the custom environment
-    gym.register(id='CustomEnv-a2c', entry_point=lambda: Environment(supervisor))
+    gym.register(id='CustomEnv-a2c', entry_point=lambda: Environment(supervisor, final_mapsdir))
     env = gym.make('CustomEnv-a2c')
 
     # Define training parameters
-    TIMESTEPS = 10000
+    TIMESTEPS = 50000
     iters = 0
     model = A2C("MlpPolicy", env, verbose=1, tensorboard_log=logdir)
 
-    for i in range(iters, 100):
+    for i in range(iters, 10):
         # Check if there are previously trained models
         model_path = f"{models_dir}/{TIMESTEPS * i}.zip"
         if os.path.exists(model_path):
@@ -112,6 +120,8 @@ def main():
             model.learn(total_timesteps=TIMESTEPS, reset_num_timesteps=False, tb_log_name="a2c")
             # Save the model after each iteration
             model.save(f"{models_dir}/{TIMESTEPS * (i + 1)}")
+            # Visualize and save the map
+            map.plot_grid(save_path=f"{mapsdir}/{TIMESTEPS * (i + 1)}.png")
 
 
 def contains_nan(values):

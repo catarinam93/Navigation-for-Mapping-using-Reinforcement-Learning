@@ -1,22 +1,19 @@
-'''This script focuses on training a Proximal Policy Optimization (PPO) agent using Stable Baselines3 library.
-It begins by setting up the simulation environment with Supervisor object and enabling various devices such
-as Lidar, Compass, GPS, and Touch Sensor. The environment uses a deterministic occupancy grid map to represent
-the robot's surroundings. After obtaining initial sensor readings and creating a transformation matrix for the
-robot's pose, LiDAR data is processed to update the map. The script then proceeds to train the PPO agent using
-the custom environment and saves the trained model at specified intervals.'''
+'''This script tests the performance of PPO, A2C, and TD3 trained models in a given environment.
+It loads the models, runs them in the environment, and generates maps of the robot's surroundings.'''
 
 from controller import Lidar, Compass, GPS, TouchSensor, Supervisor
-from stable_baselines3 import PPO
+from stable_baselines3 import PPO, A2C, TD3
 from environment import *
 from map import *
 import gymnasium as gym
 import os
 import torch
+import math
+import numpy as np
 
 print(torch.cuda.is_available())
 
-
-def main():
+def test_model(model_class, model_path, env_id, map_save_path):
     # Create a Supervisor object
     supervisor: Supervisor = Supervisor()
     # Get the simulation timestep
@@ -73,61 +70,48 @@ def main():
     supervisor_tf: np.ndarray = create_tf_matrix((supervisor_position[0], supervisor_position[1], 0.0),
                                                  supervisor_orientation)
 
-    # Read the LiDAR data and update the map
-    point_cloud = lidar.getPointCloud()
-    valid_points = [(point.x, point.y) for point in point_cloud if
-                    not (math.isnan(point.x) or math.isnan(point.y) or math.isnan(point.z))]
-    map.update_map(supervisor_tf, valid_points)
-
-    # ----------------------------------- PPO ---------------------------------------------
-
-    # Define directories for saving models and logging
-    models_dir = "models/PPO"
-    logdir = "tensorboard"
-    mapsdir = "maps_images/PPO/map2/iter"
-    final_mapsdir = "maps_images/PPO/map2/final_maps" # change map_x depending on the used world
-
-    # Create directories if they don't exist
-    if not os.path.exists(models_dir):
-        os.makedirs(models_dir)
-
-    if not os.path.exists(logdir):
-        os.makedirs(logdir)
-
-    if not os.path.exists(mapsdir):
-        os.makedirs(mapsdir)
-
-    if not os.path.exists(final_mapsdir):
-        os.makedirs(final_mapsdir)
+    # Load the trained model
+    model = model_class.load(model_path)
 
     # Register and create the custom environment
-    gym.register(id='CustomEnv-ppo', entry_point=lambda: Environment(supervisor, final_mapsdir))
-    env = gym.make('CustomEnv-ppo')
+    gym.register(id=env_id, entry_point=lambda: Environment(supervisor, map_save_path))
+    env = gym.make(env_id)
 
-    # Define training parameters
-    TIMESTEPS = 50000
-    iters = 10
-    model = PPO("MlpPolicy", env, verbose=1, tensorboard_log=logdir)
+    # Run the environment with the loaded model
+    obs = env.reset()
+    done = False
+    while not done:
+        action, _states = model.predict(obs, deterministic=True)
+        obs, rewards, done, info = env.step(action)
 
-    for i in range(iters, 15):
-        # Check if there are previously trained models
-        model_path = f"{models_dir}/{i}.zip"
-        if os.path.exists(model_path):
-            print(f"Loading the trained model from {model_path}")
-            model = PPO.load(model_path, env)
-        # Train the model
-        model.learn(total_timesteps=TIMESTEPS, reset_num_timesteps=False, tb_log_name="ppo")
-        # Save the model after each iteration
-        model.save(f"{models_dir}/{(i + 1)}")
-        # Visualize and save the map
-        map.plot_grid(save_path=f"{mapsdir}/{(i + 1)}.png")
+        # Read the LiDAR data and update the map
+        point_cloud = lidar.getPointCloud()
+        valid_points = [(point.x, point.y) for point in point_cloud if
+                        not (math.isnan(point.x) or math.isnan(point.y) or math.isnan(point.z))]
+        map.update_map(supervisor_tf, valid_points)
 
+        supervisor.step(timestep)
 
+    # Visualize and save the map
+    map.plot_grid(save_path=map_save_path)
 
 def contains_nan(values):
     # Check if the list contains NaN values
     return any(math.isnan(value) for value in values)
 
-
 if __name__ == "__main__":
-    main()
+    # Define model directories
+    models_dir = "models"
+    maps_dir = "test_maps"
+
+    if not os.path.exists(maps_dir):
+        os.makedirs(maps_dir)
+
+    # Test PPO model
+    test_model(PPO, f"{models_dir}/PPO/10.zip", 'CustomEnv-ppo', f"{maps_dir}/ppo_map.png")
+
+    # Test A2C model
+    test_model(A2C, f"{models_dir}/A2C/10.zip", 'CustomEnv-a2c', f"{maps_dir}/a2c_map.png")
+
+    # Test TD3 model
+    test_model(TD3, f"{models_dir}/TD3/10.zip", 'CustomEnv-td3', f"{maps_dir}/td3_map.png")
