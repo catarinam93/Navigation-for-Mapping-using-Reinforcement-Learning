@@ -105,3 +105,4 @@ class DeterministicOccupancyGrid(OccupancyGrid):
             plt.savefig(save_path)
         else:
             plt.show()
+        plt.close()
