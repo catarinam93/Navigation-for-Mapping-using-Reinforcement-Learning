@@ -1,4 +1,4 @@
-'''This script tests the performance of PPO, A2C, and SAC trained models in a given environment.
+'''This script tests the performance of PPO, A2C, SAC and TD3 trained models in a given environment.
 It loads the models, runs them in the environment, and generates maps of the robot's surroundings.'''
 
 from controller import Lidar, Compass, GPS, TouchSensor
@@ -141,3 +141,6 @@ if __name__ == "__main__":
 
     # Test SAC model
     #test_model(SAC, f"{models_dir}/SAC.zip", 'CustomEnv-sac', f"{maps_dir}/SAC/")
+
+    # Test TD3 model
+    # test_model(TD3, f"{models_dir}/TD3.zip", 'CustomEnv-sac', f"{maps_dir}/TD3/")

@@ -84,7 +84,7 @@ def main():
     # Define directories for saving models and logging
     models_dir = "models/PPO"
     logdir = "tensorboard"
-    mapsdir = "maps_images/PPO/map5" # change mapx depending on the used world
+    mapsdir = "maps_images/PPO/map0" # change mapx depending on the used world
 
     # Create directories if they don't exist
     if not os.path.exists(models_dir):
