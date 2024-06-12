@@ -12,11 +12,12 @@ The aim of this project was to develop a mobile robot that must build a map of a
 Actions are the linear and angular velocitites.
 #### Rewards
 Reward is given for every map completly explored and for neutral behaviour. 
+
 Penalties are given if there is a collision or if the robot gets to close to the walls
 #### States
 The initial state places the robot on a random wall-free spot on the world (to avoid overfitting). Episodes end if the robot can map the entire world.
 #### Percepts (Observations)
-Observations include various details such as collision sensor's and Lidar sensor's output and the occupancy map.
+Observations include various details such as collision sensor's and Lidar sensor's readings and the occupancy map.
 #### RL algorithms chosen
 * PPO
 * SAC
