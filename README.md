@@ -34,7 +34,7 @@ Observations include various details such as collision sensor's and Lidar sensor
 ### Training Process
 
 ### Experimental Results - on tensorboard
-![Experimental Results](images/experimental_results.png)
+![Experimental Results](images/tensorboard.png)
 
 #### Test Results
 After training, tests were wade on a map (map6) of increased difficulty. The tests were conducted only with PPO and A2C once these were the only algorithms which manage to complete training. The following maps are the results of that test phase.
