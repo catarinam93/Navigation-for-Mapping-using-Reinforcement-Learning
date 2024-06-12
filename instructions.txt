@@ -52,11 +52,11 @@ Instructions:
 4. Open the project in any Python IDE of your choice (we recommend using PyCharm).
 5. Navigate to the "worlds" folder in the project directory, which contains the environment worlds for Webots simulation.
 6. Open the desired world file in Webots to observe the environment.
-7. Run the desired reinforcement learning algorithm script (ppo_main.py, sac_main.py, a2c_main.py) to train the navigation agent.
+7. Run the desired reinforcement learning algorithm script (ppo_main.py, sac_main.py, a2c_main.py, td3_main.py) to train the navigation agent.
 8. While training the navigation agent, you can observe its behavior by running the simulation in Webots.
-9. After training your models, to test the performance of PPO, A2C, and SAC trained models, follow these steps:
+9. After training your models, to test the performance of the trained models, follow these steps:
     a. Choose the desired environment map you want to test the models on.
-    b. Inside the `test.py` script, ensure that you select the most recent model file (e.g., `10.zip`) for each respective algorithm (PPO, A2C, SAC).
+    b. Inside the `test.py` script, ensure that you select the most recent model file (e.g., `10.zip`) for each respective algorithm.
     c. Run the script and visualize the generated maps for each algorithm.
     d. Open the 'images_timesteps.py' script to calculate the average number of timesteps for each method.
 

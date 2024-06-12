@@ -1,8 +1,8 @@
-'''This script tests the performance of PPO, A2C, and TD3 trained models in a given environment.
+'''This script tests the performance of PPO, A2C, and SAC trained models in a given environment.
 It loads the models, runs them in the environment, and generates maps of the robot's surroundings.'''
 
-from controller import Lidar, Compass, GPS, TouchSensor, Supervisor
-from stable_baselines3 import PPO, A2C, TD3
+from controller import Lidar, Compass, GPS, TouchSensor
+from stable_baselines3 import PPO, A2C, SAC
 from environment import *
 from map import *
 import gymnasium as gym
@@ -10,6 +10,8 @@ import os
 import torch
 import math
 import numpy as np
+import time
+
 
 print(torch.cuda.is_available())
 
@@ -70,6 +72,12 @@ def test_model(model_class, model_path, env_id, map_save_path):
     supervisor_tf: np.ndarray = create_tf_matrix((supervisor_position[0], supervisor_position[1], 0.0),
                                                  supervisor_orientation)
 
+    # Read the LiDAR data and update the map
+    point_cloud = lidar.getPointCloud()
+    valid_points = [(point.x, point.y) for point in point_cloud if
+                    not (math.isnan(point.x) or math.isnan(point.y) or math.isnan(point.z))]
+    map.update_map(supervisor_tf, valid_points)
+
     # Load the trained model
     model = model_class.load(model_path)
 
@@ -78,22 +86,40 @@ def test_model(model_class, model_path, env_id, map_save_path):
     env = gym.make(env_id)
 
     # Run the environment with the loaded model
-    obs = env.reset()
-    done = False
-    while not done:
-        action, _states = model.predict(obs, deterministic=True)
-        obs, rewards, done, info = env.step(action)
+    timestep_count = 0
+    start_time = time.time()
+    episodes = 10
+    total_reward = 0
 
-        # Read the LiDAR data and update the map
-        point_cloud = lidar.getPointCloud()
-        valid_points = [(point.x, point.y) for point in point_cloud if
-                        not (math.isnan(point.x) or math.isnan(point.y) or math.isnan(point.z))]
-        map.update_map(supervisor_tf, valid_points)
+    for ep in range(episodes):
+        obs, info = env.reset()
+        done = False
+        for i in range(850):
+            action, _states = model.predict(obs, deterministic=True)
+            obs, rewards, done, info, _ = env.step(action)
+            timestep_count += 1
+            total_reward += rewards
 
-        supervisor.step(timestep)
+            # Read the LiDAR data and update the map
+            point_cloud = lidar.getPointCloud()
+            valid_points = [(point.x, point.y) for point in point_cloud if
+                            not (math.isnan(point.x) or math.isnan(point.y) or math.isnan(point.z))]
+            map.update_map(supervisor_tf, valid_points)
 
-    # Visualize and save the map
-    map.plot_grid(save_path=map_save_path)
+            supervisor.step(timestep)
+            print("total_reward", total_reward)
+            print(ep, rewards, done)
+            print("---------------")
+        # Visualize and save the map
+        map.plot_grid(save_path=f'{map_save_path}/{ep}.png')
+
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+
+    # Print the results
+    print(f"Model: {model_class.__name__}")
+    print(f"Elapsed time: {elapsed_time:.2f} seconds")
+    print(f"Timesteps: {timestep_count}")
 
 def contains_nan(values):
     # Check if the list contains NaN values
@@ -108,10 +134,10 @@ if __name__ == "__main__":
         os.makedirs(maps_dir)
 
     # Test PPO model
-    test_model(PPO, f"{models_dir}/PPO/10.zip", 'CustomEnv-ppo', f"{maps_dir}/ppo_map.png")
+    test_model(PPO, f"{models_dir}/PPO.zip", 'CustomEnv-ppo', f"{maps_dir}/PPO/")
 
     # Test A2C model
-    test_model(A2C, f"{models_dir}/A2C/10.zip", 'CustomEnv-a2c', f"{maps_dir}/a2c_map.png")
+    test_model(A2C, f"{models_dir}/A2C.zip", 'CustomEnv-a2c', f"{maps_dir}/A2C/")
 
-    # Test TD3 model
-    test_model(TD3, f"{models_dir}/TD3/10.zip", 'CustomEnv-td3', f"{maps_dir}/td3_map.png")
+    # Test SAC model
+    #test_model(SAC, f"{models_dir}/SAC.zip", 'CustomEnv-sac', f"{maps_dir}/SAC/")

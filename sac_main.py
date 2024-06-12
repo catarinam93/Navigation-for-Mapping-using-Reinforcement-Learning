@@ -84,8 +84,7 @@ def main():
     # Define directories for saving models and logging
     models_dir = "models/SAC"
     logdir = "tensorboard"
-    mapsdir = "maps_images/SAC/map0/iter"
-    final_mapsdir = "maps_images/SAC/map0/final_maps"  # change map_x depending on the used world
+    mapsdir = "maps_images/SAC/map0" # change mapx depending on the used world
 
     # Create directories if they don't exist
     if not os.path.exists(models_dir):
@@ -97,11 +96,9 @@ def main():
     if not os.path.exists(mapsdir):
         os.makedirs(mapsdir)
 
-    if not os.path.exists(final_mapsdir):
-        os.makedirs(final_mapsdir)
 
     # Register and create the custom environment
-    gym.register(id='CustomEnv-sac', entry_point=lambda: Environment(supervisor, final_mapsdir))
+    gym.register(id='CustomEnv-sac', entry_point=lambda: Environment(supervisor, mapsdir))
     env = gym.make('CustomEnv-sac')
 
     # Define training parameters
@@ -109,19 +106,17 @@ def main():
     iters = 0
     model = SAC("MlpPolicy", env, verbose=1, buffer_size=100000, tensorboard_log=logdir)
 
-    for i in range(iters, 10):
+    for i in range(iters, 5):
         # Check if there are previously trained models
-        model_path = f"{models_dir}/{TIMESTEPS * i}.zip"
+        model_path = f"{models_dir}/{i}.zip"
         if os.path.exists(model_path):
             print(f"Loading the trained model from {model_path}")
             model = SAC.load(model_path, env)
-        else:
-            # Train the model
-            model.learn(total_timesteps=TIMESTEPS, reset_num_timesteps=False, tb_log_name="sac")
-            # Save the model after each iteration
-            model.save(f"{models_dir}/{TIMESTEPS * (i + 1)}")
-            # Visualize and save the map
-            map.plot_grid(save_path=f"{mapsdir}/{TIMESTEPS * (i + 1)}.png")
+        # Train the model
+        model.learn(total_timesteps=TIMESTEPS, reset_num_timesteps=False, tb_log_name="sac")
+        # Save the model after each iteration
+        model.save(f"{models_dir}/{(i + 1)}")
+        # Visualize and save the map
 
 
 def contains_nan(values):

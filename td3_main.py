@@ -1,12 +1,12 @@
-'''This script focuses on training a Proximal Policy Optimization (PPO) agent using Stable Baselines3 library.
-It begins by setting up the simulation environment with Supervisor object and enabling various devices such
-as Lidar, Compass, GPS, and Touch Sensor. The environment uses a deterministic occupancy grid map to represent
-the robot's surroundings. After obtaining initial sensor readings and creating a transformation matrix for the
-robot's pose, LiDAR data is processed to update the map. The script then proceeds to train the PPO agent using
-the custom environment and saves the trained model at specified intervals.'''
+'''This script demonstrates the usage of the Stable Baselines3 library for training a Soft Actor-Critic (SAC) agent
+in a custom robotics environment. It starts by setting up the simulation environment with a Supervisor object and
+initializing devices such as Lidar, Compass, GPS, and Touch Sensor. The environment uses a deterministic occupancy
+grid map to represent the robot's surroundings. After obtaining initial sensor readings and creating a transformation
+matrix for the robot's pose, LiDAR data is processed to update the map. The script then proceeds to train the SAC agent
+using the custom environment and saves the trained model at specified intervals.'''
 
-from controller import Lidar, Compass, GPS, TouchSensor, Supervisor
-from stable_baselines3 import PPO
+from stable_baselines3 import TD3
+from controller import Lidar, Compass, GPS, TouchSensor
 from environment import *
 from map import *
 import gymnasium as gym
@@ -79,12 +79,13 @@ def main():
                     not (math.isnan(point.x) or math.isnan(point.y) or math.isnan(point.z))]
     map.update_map(supervisor_tf, valid_points)
 
-    # ----------------------------------- PPO ---------------------------------------------
+
+    # ----------------------------------- TD3 ---------------------------------------------
 
     # Define directories for saving models and logging
-    models_dir = "models/PPO"
+    models_dir = "models/TD3"
     logdir = "tensorboard"
-    mapsdir = "maps_images/PPO/map5" # change mapx depending on the used world
+    mapsdir = "maps_images/TD3/map0"
 
     # Create directories if they don't exist
     if not os.path.exists(models_dir):
@@ -97,24 +98,28 @@ def main():
         os.makedirs(mapsdir)
 
     # Register and create the custom environment
-    gym.register(id='CustomEnv-ppo', entry_point=lambda: Environment(supervisor, mapsdir))
-    env = gym.make('CustomEnv-ppo')
+    gym.register(id='CustomEnv-td3', entry_point=lambda: Environment(supervisor, mapsdir))
+    env = gym.make('CustomEnv-td3')
 
     # Define training parameters
     TIMESTEPS = 50000
     iters = 0
-    model = PPO("MlpPolicy", env, verbose=1, tensorboard_log=logdir)
+
+    model = TD3("MlpPolicy", env, verbose=1, tensorboard_log=logdir)
 
     for i in range(iters, 5):
         # Check if there are previously trained models
         model_path = f"{models_dir}/{i}.zip"
         if os.path.exists(model_path):
             print(f"Loading the trained model from {model_path}")
-            model = PPO.load(model_path, env)
+            model = TD3.load(model_path, env)
         # Train the model
-        model.learn(total_timesteps=TIMESTEPS, reset_num_timesteps=False, tb_log_name="ppo")
+        model.learn(total_timesteps=TIMESTEPS, reset_num_timesteps=False, tb_log_name="td3")
         # Save the model after each iteration
         model.save(f"{models_dir}/{(i + 1)}")
+        # Visualize and save the map
+        map.plot_grid(save_path=f"{mapsdir}/{(i + 1)}.png")
+
 
 def contains_nan(values):
     # Check if the list contains NaN values
