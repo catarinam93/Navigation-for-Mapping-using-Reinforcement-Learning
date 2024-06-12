@@ -34,24 +34,62 @@ Observations include various details such as collision sensor's and Lidar sensor
 ### Training Process
 During training, it’s also possible to monitor the robot’s behavior in Webots in real-time, observing the robot’s interactions with the environment and visualizing the maps it generates and saves as it explores.
 
-![Train](images/train/train1.png)
-![Generated](images/train/generated1.png)
+<p float="left">
+  <img src="images/train/train1.png" width="45%" />
+  <img src="images/train/generated1.png" width="45%" />
+</p>
 
 ### Experimental Results - on tensorboard
 ![Experimental Results](images/tensorboard.png)
 
 #### Test Results
-After training, tests were wade on a map (map6) of increased difficulty. 
-![Simulation Maps](images/simulation_maps/map6.jpg)
+After training, tests were made on a map (map6) of increased difficulty.
+
+<p align="center">
+  <img src="images/simulation_maps/map6.jpg" width="50%" />
+</p>
+
 The tests were conducted only with PPO and A2C once these were the only algorithms which manage to complete training. 
 The following maps are the results of that test phase.
-##### PPO
-![Test](test_maps/PPO/9.png)
-##### A2C
-![Test](test_maps/A2C/9.png)
+##### PPO and A2C (respectively)
+<p float="left">
+  <img src="test_maps/PPO/9.png" width="45%" />
+  <img src="test_maps/A2C/9.png" width="45%" />
+</p>
 
 ### Conclusion
 
+The training phase results revealed that PPO and A2C outperformed SAC
+and TD3 in terms of the number of maps completed. PPO exhibited a more
+aggressive exploration strategy, completing a significant number of maps but
+with a high degree of variability in performance, as evidenced by the reward
+trends. A2C, while completing fewer maps, showed more consistent performance,
+maintaining stability across the training sessions. SAC and TD3 struggled with
+the complexity of the maps, failing to complete any beyond the initial stages.
+In the test phase, both PPO and A2C were evaluated on an unseen map. The
+occupancy grids generated during this phase underscored the differences in their
+exploration strategies. PPO’s broader exploration allowed it to cover more area,
+potentially enabling it to adapt better to new environments. A2C, on the other
+hand, maintained a more focused exploration pattern, reflecting its conservative
+approach observed during training.
+Despite the promising results, there are several areas for improvement to en-
+hance the performance of RL algorithms in robotic navigation tasks. Fine-tuning
+the reward structure could significantly impact the learning efficiency and effec-
+tiveness. Providing more granular feedback for intermediate goals or penalizing
+unnecessary movements could help in optimizing the learning process. Extending
+the number of timesteps in training could allow the algorithms to explore more
+thoroughly and develop a deeper understanding of the environment, potentially
+improving performance on more complex maps. Incorporating advancements in
+RL algorithms, such as hybrid models that combine the strengths of different ap-
+proaches, could yield better performance. Employing cross-validation techniques
+to test the algorithms on a variety of unseen maps during training could also
+provide a more robust assessment of their generalization capabilities.
+In conclusion, while PPO and A2C have shown promising results in robotic
+navigation tasks, there is substantial room for improvement. By addressing the
+outlined areas, the performance and reliability of RL algorithms can be en-
+hanced, paving the way for more effective and adaptive robotic systems. This
+study serves as a foundation for future research aimed at refining these algo-
+rithms and expanding their applicability in complex real-world environments.
 
 ## Files
 - **a2c_main.py**: Implementation of the A2C (Advantage Actor-Critic) algorithm for training the navigation agent.
@@ -68,6 +106,6 @@ The following maps are the results of that test phase.
 - **settings.py**: Set of reward constants for RL's algorithms.
 - **test.py**: Script for testing the performance of trained models in a given environment.
 - **maps_images/**: Folder containing images of the generated maps while training.
-- **models/**: Folder containing trained models.
+- **models/**: Folder containing trained models. (The SAC model is missing due to its large size)
 - **tensorboard/**: Folder containing TensorBoard logs.
 - **test_maps/**: Folder containing generated maps during test.
