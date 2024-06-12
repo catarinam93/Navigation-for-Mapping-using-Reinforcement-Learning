@@ -39,9 +39,9 @@ Observations include various details such as collision sensor's and Lidar sensor
 #### Test Results
 After training, tests were wade on a map (map6) of increased difficulty. The tests were conducted only with PPO and A2C once these were the only algorithms which manage to complete training. The following maps are the results of that test phase.
 ##### PPO
-![Test](images/test_maps/PPO/9.png)
+![Test](test_maps/PPO/9.png)
 ##### A2C
-![Test](images/test_maps/A2C/9.png)
+![Test](test_maps/A2C/9.png)
 
 ### Conclusion
 
