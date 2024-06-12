@@ -33,6 +33,7 @@ Observations include various details such as collision sensor's and Lidar sensor
 
 ### Training Process
 During training, it’s also possible to monitor the robot’s behavior in Webots in real-time, observing the robot’s interactions with the environment and visualizing the maps it generates and saves as it explores.
+
 ![Train](images/train/train1.png)
 ![Generated](images/train/generated1.png)
 
@@ -41,9 +42,8 @@ During training, it’s also possible to monitor the robot’s behavior in Webot
 
 #### Test Results
 After training, tests were wade on a map (map6) of increased difficulty. 
-The tests were conducted only with PPO and A2C once these were the only algorithms which manage to complete training. 
 ![Simulation Maps](images/simulation_maps/map6.jpg)
-
+The tests were conducted only with PPO and A2C once these were the only algorithms which manage to complete training. 
 The following maps are the results of that test phase.
 ##### PPO
 ![Test](test_maps/PPO/9.png)
