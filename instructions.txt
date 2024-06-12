@@ -58,4 +58,5 @@ Instructions:
     a. Choose the desired environment map you want to test the models on.
     b. Inside the `test.py` script, ensure that you select the most recent model file (e.g., `10.zip`) for each respective algorithm (PPO, A2C, SAC).
     c. Run the script and visualize the generated maps for each algorithm.
+    d. Open the 'images_timesteps.py' script to calculate the average number of timesteps for each method.
 

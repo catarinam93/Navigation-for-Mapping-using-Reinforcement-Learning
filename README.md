@@ -18,3 +18,4 @@ Assignment of the course Introduction to Intelligent Robotics (3rd year, 2nd sem
 - **test.py**: Script for testing the performance of trained models in a given environment.
 - **worlds/**: Folder containing the environment worlds for Webots simulation.
 - **instructions.txt**: File containing instructions to run the code.
+- **images_timesteps.py**: Script to calculate the average number of timesteps for each method and map.
