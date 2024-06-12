@@ -5,11 +5,12 @@ Assignment of the course Introduction to Intelligent Robotics (3rd year, 2nd sem
 
 ## Files
 
+
 - **environment.py**: Definition of the simulation environment where the navigation agent interacts.
 - **map.py**: Includes class DeterministicOccupancyGrid that represents a deterministic occupancy grid map.
 - **ppo_main.py**: Implementation of the PPO (Proximal Policy Optimization) algorithm for training the navigation agent.
 - **a2c_main.py**: Implementation of the A2C (Advantage Actor-Critic) algorithm for training the navigation agent.
-- **td3_main.py**: Implementation of the TD3 (Twin Delayed DDPG) algorithm for training the navigation agent.
+- **sac_main.py**: Implementation of the SAC (Soft Actor-Critic) algorithm for training the navigation agent.
 - **settings.py**: Set of reward constants for RL's algorithms.
 - **occupancy_grid.py**: Occupancy Grid base class (By: Gonçalo Leão).
 - **transformations.py**: Functions for working with 3D transformations (By: Gonçalo Leão).
