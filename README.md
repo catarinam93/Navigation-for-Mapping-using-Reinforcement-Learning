@@ -1,7 +1,7 @@
 # README
 
 ## Navigation-for-Mapping-using-Reinforcement-Learning
-Assignment of the course Introduction to Intelligent Robotics (3rd year, 2nd semester)
+Assignment of the course Introduction to Intelligent Robotics (BSc in Artificial Intelligence and Data Science 3rd year, 2nd semester)
 
 ## A little context
 ### Overview
